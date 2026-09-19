@@ -31,7 +31,7 @@
    | `http_request_duration_seconds` | histogram | `method`, `path` |
    | `redirects_total` | counter | — ; растёт на каждый ответ 307 |
 
-   Метка `path` — **шаблон маршрута** (`/links/{code}`), а не сырой путь (`/links/Ab3dE9`). Шаблон лежит в `request.scope["route"].path` после того, как запрос обработан. Почему это важно: каждое уникальное значение метки — отдельный временной ряд в Prometheus. С сырым путём каждая новая ссылка добавляет ряды, и память Prometheus растёт без предела. Объясните это своими словами в README, в разделе «Наблюдаемость».
+   Метка `path` — **шаблон маршрута** (`/links/{code}`), а не сырой путь (`/links/Ab3dE9`). Шаблон лежит в `request.scope["route"].path` после того, как запрос обработан. Почему это важно: каждое уникальное значение метки — отдельный временной ряд в Prometheus. С сырым путём каждая новая ссылка добавляет ряды, и память Prometheus растёт без предела. Запросы на несуществующие пути (сканеры, опечатки) маршрута не имеют — для них пишите в `path` одно общее значение, например `unmatched`. Объясните это своими словами в README, в разделе «Наблюдаемость».
 4. **Prometheus и Grafana в compose.** Добавьте сервисы и конфиги в `observability/`:
    - `observability/prometheus/prometheus.yml`: `scrape_interval: 5s`, job `app` с целью `app:8000`, `rule_files: [rules.yml]`;
    - `observability/grafana/provisioning/datasources/datasources.yaml`: Prometheus (`http://prometheus:9090`, по умолчанию) и Loki (`http://loki:3100`);
@@ -138,7 +138,7 @@
 
 - в каждом ответе есть `X-Request-ID`, пришедший возвращается тем же;
 - запрос с уникальным `X-Request-ID` в течение 30 секунд находится в Loki запросом `{service="app"} |= "<id>"`, строка — JSON со всеми обязательными полями;
-- `/metrics` отдаётся; после 5 запросов `GET /links/{code}` счётчик с `path="/links/{code}"` вырос на 5 и больше, сырого пути в метке нет; есть `http_request_duration_seconds_bucket`; `redirects_total` растёт после перехода;
+- `/metrics` отдаётся; после 5 запросов `GET /links/{code}` счётчик с `path="/links/{code}"` вырос на 5 и больше, сырого пути в метке нет; запрос на несуществующий путь не создаёт метку с сырым путём; есть `http_request_duration_seconds_bucket`; `redirects_total` растёт после перехода;
 - в Prometheus target `app` в состоянии `up`, правила `AppDown` и `HighErrorRate` загружены;
 - в Grafana есть дашборд `app-overview` с 4+ панелями и источники данных Prometheus и Loki;
 - отдельным шагом CI — `promtool check rules observability/prometheus/rules.yml`.

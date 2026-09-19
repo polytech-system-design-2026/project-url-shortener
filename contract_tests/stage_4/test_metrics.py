@@ -33,6 +33,22 @@ def test_http_requests_total_uses_route_template(client: httpx.Client) -> None:
     )
 
 
+def test_unknown_paths_do_not_create_series(client: httpx.Client) -> None:
+    raw = f"/no/such/page-{unique_suffix()}"
+    client.get(raw)
+    paths = {
+        labels.get("path")
+        for name, labels, _ in metric_samples(client)
+        if name == "http_requests_total"
+    }
+    require(
+        raw not in paths,
+        f"Запрос на несуществующий путь {raw} создал в http_requests_total метку path с сырым "
+        "путём. В path — только шаблон маршрута; для запросов мимо маршрутов — одно общее "
+        "значение, иначе любой сканер создаст тысячи временных рядов.",
+    )
+
+
 def test_request_duration_histogram(client: httpx.Client) -> None:
     client.get("/health")
     names = {name for name, _, _ in metric_samples(client)}
