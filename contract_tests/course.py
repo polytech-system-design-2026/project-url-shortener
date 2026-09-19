@@ -108,7 +108,10 @@ def main(argv: list[str]) -> int:
                 "контрактных тестов по HTTP нет. Запустите make check-stage-1."
             )
             return 0
-        print(f"Этап {course.stage}: гоняю contract_tests/stage_2 … stage_{course.stage_number}")
+        print(
+            f"Этап {course.stage}: гоняю contract_tests/stage_2 … stage_{course.stage_number}",
+            flush=True,
+        )
         return run_pytest(contract_dirs(course.stage_number), extra)
 
     print(f"Неизвестная команда {command!r}.\n{__doc__}", file=sys.stderr)

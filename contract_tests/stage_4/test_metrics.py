@@ -1,0 +1,55 @@
+# ABOUTME: Stage 4 metrics of the URL shortener: HTTP counters and histogram with templated path,
+# ABOUTME: and the business metric redirects_total growing on each 307.
+import httpx
+
+from contract_tests.helpers import metric_samples, metric_sum, require, unique_suffix
+
+
+def create(client: httpx.Client) -> str:
+    resp = client.post("/links", json={"url": f"https://example.com/metrics/{unique_suffix()}"})
+    require(resp.status_code == 201, f"POST /links: ожидали 201, получили {resp.status_code}.")
+    return str(resp.json()["code"])
+
+
+def test_http_requests_total_uses_route_template(client: httpx.Client) -> None:
+    code = create(client)
+    before = metric_sum(
+        metric_samples(client), "http_requests_total", method="GET", path="/links/{code}"
+    )
+    for _ in range(5):
+        client.get(f"/links/{code}")
+    samples = metric_samples(client)
+    after = metric_sum(samples, "http_requests_total", method="GET", path="/links/{code}")
+    raw_paths = {labels.get("path") for name, labels, _ in samples if name == "http_requests_total"}
+    require(
+        f"/links/{code}" not in raw_paths,
+        f"В метке path метрики http_requests_total сырой путь /links/{code}. Нужен шаблон "
+        "маршрута (/links/{code}): иначе каждая ссылка порождает свой временной ряд.",
+    )
+    require(
+        after - before >= 5,
+        f'После 5 запросов GET /links/{{code}} счётчик http_requests_total{{method="GET", '
+        f'path="/links/{{code}}"}} вырос на {after - before:g}, ждали не меньше 5.',
+    )
+
+
+def test_request_duration_histogram(client: httpx.Client) -> None:
+    client.get("/health")
+    names = {name for name, _, _ in metric_samples(client)}
+    require(
+        "http_request_duration_seconds_bucket" in names,
+        "В /metrics нет гистограммы http_request_duration_seconds (сэмплов *_bucket). "
+        "Используйте Histogram из prometheus-client с метками method и path.",
+    )
+
+
+def test_redirects_total_grows(client: httpx.Client) -> None:
+    code = create(client)
+    before = metric_sum(metric_samples(client), "redirects_total")
+    client.get(f"/{code}", follow_redirects=False)
+    after = metric_sum(metric_samples(client), "redirects_total")
+    require(
+        after - before >= 1,
+        f"После перехода по /{code} бизнес-метрика redirects_total выросла на "
+        f"{after - before:g}, ждали 1. Метрика — counter, увеличивается на каждый ответ 307.",
+    )

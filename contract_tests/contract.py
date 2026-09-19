@@ -12,5 +12,5 @@ STAGE_2_OPERATIONS: dict[tuple[str, str], set[str]] = {
 
 # Длина docs/ARCHITECTURE.md в шаблоне, символов без пробельных. Заполненный
 # документ должен быть длиннее хотя бы на ARCHITECTURE_MIN_ADDED.
-ARCHITECTURE_TEMPLATE_LENGTH = 0
+ARCHITECTURE_TEMPLATE_LENGTH = 3380
 ARCHITECTURE_MIN_ADDED = 1500

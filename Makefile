@@ -19,7 +19,7 @@ format:
 
 test:
 	@uv run pytest tests -q; code=$$?; \
-	if [ $$code -eq 5 ]; then echo "Своих тестов пока нет — на этапе 1 это нормально."; exit 0; fi; \
+	if [ $$code -eq 5 ]; then echo "Своих тестов пока нет. На этапе 1 это нормально, с этапа 2 нужно не меньше 5 (tasks/TASK-2.md)."; exit 0; fi; \
 	exit $$code
 
 check: lint test

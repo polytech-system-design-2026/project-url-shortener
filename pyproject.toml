@@ -52,6 +52,10 @@ select = ["E", "F", "I", "B", "UP"]
 # а не баг; без этого ruff ругался бы на каждый эндпоинт.
 ignore = ["B008"]
 
+[tool.ruff.lint.isort]
+# Папка alembic/ с миграциями — не пакет проекта, а импорт библиотеки alembic.
+known-third-party = ["alembic"]
+
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"

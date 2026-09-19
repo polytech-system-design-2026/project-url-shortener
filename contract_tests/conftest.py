@@ -8,34 +8,14 @@ CI перед прогоном заменяет всю папку contract_tests
 """
 
 import os
-import time
 from collections.abc import Iterator
 
 import httpx
 import pytest
 
+from contract_tests.helpers import wait_until_healthy
+
 BASE_URL = os.environ.get("APP_URL", "http://localhost:8000")
-
-
-def wait_until_healthy(client: httpx.Client, timeout: float = 120.0) -> None:
-    """Ждёт 200 от GET /health, иначе падает с подсказкой, куда смотреть."""
-    deadline = time.monotonic() + timeout
-    last = "нет ответа"
-    while time.monotonic() < deadline:
-        try:
-            resp = client.get("/health")
-            if resp.status_code == 200:
-                return
-            last = f"HTTP {resp.status_code}: {resp.text[:200]}"
-        except httpx.HTTPError as exc:
-            last = f"{type(exc).__name__}: {exc}"
-        time.sleep(2)
-    pytest.fail(
-        f"Сервис на {BASE_URL} не ответил 200 на GET /health за {timeout:.0f} с "
-        f"(последний ответ: {last}). Поднимите сервис (make up) и посмотрите "
-        "docker compose logs app.",
-        pytrace=False,
-    )
 
 
 @pytest.fixture(scope="session")
