@@ -40,7 +40,7 @@
 | POST | `/links` | `{"url": "https://example.com/very/long"}` | `{"code": "Ab3dE9", "short_url": "http://localhost:8000/Ab3dE9", "url": "..."}` | 201; 422 — не http/https, не URL, пустое тело |
 | GET | `/{code}` | — | редирект, заголовок `Location` = исходный URL | 307; 404 — неизвестный код |
 | GET | `/links/{code}` | — | `{"code", "url", "created_at"}` | 200; 404 |
-| GET | `/health` | — | `{"status": "ok"}` | 200 |
+| GET | `/health` | — | `{"status": "ok"}` | 200; 503 — БД недоступна |
 
 - `code` — 4–10 символов `[A-Za-z0-9]`.
 - `short_url` — полная ссылка, оканчивается на `/<code>`.
