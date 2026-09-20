@@ -100,7 +100,7 @@ docker compose start db
 
 ## Как сдать
 
-PR `develop → main`, reviewer `vladefr97`. В описании PR — ссылка на раздел README «Нагрузочный тест». Сообщение в чат: «project-url-shortener, ник, этап 3, PR готов». Подробно — в `Договоренности.md` курса.
+PR `develop → main`, reviewer `vladefr97`. В описании PR — ссылка на раздел README «Нагрузочный тест». Сообщение в чат: «project-url-shortener, ник, этап 3, PR готов». Подробно — в закреплённых сообщениях чата курса.
 
 ## Типичные ошибки
 
