@@ -3,7 +3,14 @@
 import httpx
 import pytest
 
-from contract_tests.helpers import eventually, require, stopped_service, unique_suffix
+from contract_tests.helpers import (
+    compose,
+    eventually,
+    require,
+    stopped_service,
+    unique_suffix,
+    wait_until_healthy,
+)
 
 CLICKS_DEADLINE = 5.0
 
@@ -65,6 +72,9 @@ def test_redirect_without_database(client: httpx.Client) -> None:
     code, url = create(client)
     first = client.get(f"/{code}", follow_redirects=False)
     require(first.status_code == 307, f"GET /{code}: ожидали 307, получили {first.status_code}.")
+    # Перезапуск app стирает кэш внутри процесса: пройти тест можно только с Redis.
+    compose("restart", "app")
+    wait_until_healthy(client)
     with stopped_service(client, "db"):
         resp = client.get(f"/{code}", follow_redirects=False)
     require(

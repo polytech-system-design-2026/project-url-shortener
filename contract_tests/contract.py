@@ -7,10 +7,11 @@ STAGE_2_OPERATIONS: dict[tuple[str, str], set[str]] = {
     ("post", "/links"): {"201", "422"},
     ("get", "/{code}"): {"307", "404"},
     ("get", "/links/{code}"): {"200", "404"},
-    ("get", "/health"): {"200"},
+    ("get", "/health"): {"200", "503"},
 }
 
-# Длина docs/ARCHITECTURE.md в шаблоне, символов без пробельных. Заполненный
-# документ должен быть длиннее хотя бы на ARCHITECTURE_MIN_ADDED.
-ARCHITECTURE_TEMPLATE_LENGTH = 3380
+# Длина docs/ARCHITECTURE.md в шаблоне без строк «> TODO:» и вводного абзаца —
+# то, что остаётся от шаблона в заполненном документе. Сам документ должен быть
+# длиннее этой базы хотя бы на ARCHITECTURE_MIN_ADDED символов без пробельных.
+ARCHITECTURE_TEMPLATE_LENGTH = 2320
 ARCHITECTURE_MIN_ADDED = 1500
